@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Gastos Daniel</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Gastos">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="theme-color" content="#534AB7">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --purple: #534AB7;
+      --purple-light: #EEEDFE;
+      --purple-dark: #3C3489;
+      --teal: #1D9E75;
+      --teal-light: #E1F5EE;
+      --amber: #BA7517;
+      --amber-light: #FAEEDA;
+      --coral: #993C1D;
+      --coral-light: #FAECE7;
+      --blue: #185FA5;
+      --blue-light: #E6F1FB;
+      --pink: #993556;
+      --pink-light: #FBEAF0;
+      --bg: #F8F7FF;
+      --surface: #FFFFFF;
+      --surface2: #F1F0FA;
+      --text: #1A1830;
+      --text2: #6B6789;
+      --border: rgba(83,74,183,0.12);
+      --radius: 14px;
+      --radius-sm: 8px;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0F0E1A;
+        --surface: #1A1830;
+        --surface2: #252340;
+        --text: #F0EEFF;
+        --text2: #9990C8;
+        --border: rgba(255,255,255,0.08);
+        --purple-light: #2A2550;
+        --teal-light: #0A2820;
+        --amber-light: #2A1E08;
+        --coral-light: #2A1208;
+        --blue-light: #0A1E38;
+        --pink-light: #2A1020;
+      }
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+    }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      max-width: 430px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      padding: calc(var(--safe-top) + 16px) 20px 16px;
+      background: var(--surface);
+      border-bottom: 0.5px solid var(--border);
+    }
+    .header-top { display: flex; align-items: center; justify-content: space-between; }
+    .header h1 { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
+    .header-badge { background: var(--purple-light); color: var(--purple); font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+
+    /* Content */
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 16px 20px;
+      padding-bottom: calc(var(--safe-bottom) + 80px);
+    }
+
+    /* Bottom nav */
+    .nav {
+      display: flex;
+      background: var(--surface);
+      border-top: 0.5px solid var(--border);
+      padding: 8px 0 calc(var(--safe-bottom) + 8px);
+    }
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 6px 0;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text2);
+      font-size: 11px;
+      font-weight: 500;
+      transition: color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nav-item.active { color: var(--purple); }
+    .nav-item svg { width: 24px; height: 24px; stroke-width: 1.8; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; }
+    .nav-item.active svg { stroke-width: 2.2; }
+
+    /* Sections */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* Metric cards */
+    .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .metric {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+    .metric-label { font-size: 11px; color: var(--text2); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+    .metric-value { font-size: 24px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
+    .metric-value.accent { color: var(--purple); }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .card-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 14px;
+    }
+
+    /* Category bars */
+    .cat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .cat-row:last-child { margin-bottom: 0; }
+    .cat-name { font-size: 13px; color: var(--text); min-width: 100px; }
+    .cat-bg { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+    .cat-fill { height: 100%; border-radius: 3px; background: var(--purple); }
+    .cat-val { font-size: 13px; color: var(--text2); min-width: 58px; text-align: right; }
+
+    /* Chart */
+    .chart-wrap { position: relative; width: 100%; height: 180px; }
+
+    /* Expense list */
+    .month-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin: 20px 0 8px;
+    }
+    .month-label:first-child { margin-top: 0; }
+    .expense-item {
+      display: flex;
+      align-items: center;
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      gap: 12px;
+    }
+    .expense-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .expense-body { flex: 1; min-width: 0; }
+    .expense-name { font-size: 15px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .expense-cat { font-size: 12px; color: var(--text2); margin-top: 2px; }
+    .expense-right { text-align: right; flex-shrink: 0; }
+    .expense-amount { font-size: 15px; font-weight: 600; color: var(--text); }
+    .btn-del { background: none; border: none; color: var(--text2); cursor: pointer; padding: 4px; margin-top: 2px; font-size: 16px; display: block; margin-left: auto; -webkit-tap-highlight-color: transparent; }
+    .btn-del:active { color: #E24B4A; }
+    .month-total {
+      display: flex; justify-content: space-between;
+      font-size: 13px; color: var(--text2);
+      padding: 4px 2px 16px;
+      border-bottom: 0.5px solid var(--border);
+      margin-bottom: 4px;
+    }
+    .month-total span:last-child { color: var(--purple); font-weight: 600; }
+
+    /* Form */
+    .form-group { margin-bottom: 14px; }
+    .form-label { display: block; font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 6px; }
+    .form-input {
+      width: 100%;
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 13px 14px;
+      font-size: 16px;
+      color: var(--text);
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .form-input:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(83,74,183,0.12); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .btn-add {
+      width: 100%;
+      background: var(--purple);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 15px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 6px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-add:active { background: var(--purple-dark); transform: scale(0.98); }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: calc(var(--safe-bottom) + 90px);
+      left: 50%; transform: translateX(-50%);
+      background: var(--text);
+      color: var(--bg);
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 100;
+    }
+    .toast.show { opacity: 1; }
+
+    .empty { text-align: center; padding: 3rem 1rem; color: var(--text2); font-size: 15px; line-height: 1.6; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="header-top">
+      <h1>Gastos</h1>
+      <span class="header-badge" id="header-total">0 €</span>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Resumen -->
+    <div id="sec-resumen" class="section active">
+      <div class="metrics" id="metrics"></div>
+      <div class="card">
+        <div class="card-title">Por categoría</div>
+        <div id="cat-bars"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Evolución mensual</div>
+        <div class="chart-wrap"><canvas id="chart" role="img" aria-label="Gastos por mes"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Gastos -->
+    <div id="sec-gastos" class="section">
+      <div id="expense-list"></div>
+    </div>
+
+    <!-- Añadir -->
+    <div id="sec-nuevo" class="section">
+      <div class="card">
+        <div class="card-title">Nuevo gasto</div>
+        <div class="form-group">
+          <label class="form-label">Descripción</label>
+          <input class="form-input" type="text" id="inp-desc" placeholder="Ej: Nike, Netflix, Gym...">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Mes</label>
+            <select class="form-input" id="inp-mes">
+              <option>Enero</option><option>Febrero</option><option>Marzo</option>
+              <option>Abril</option><option>Mayo</option><option>Junio</option>
+              <option>Julio</option><option>Agosto</option><option>Septiembre</option>
+              <option>Octubre</option><option>Noviembre</option><option>Diciembre</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Año</label>
+            <select class="form-input" id="inp-year">
+              <option>2024</option><option>2025</option><option selected>2026</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Categoría</label>
+          <select class="form-input" id="inp-cat">
+            <option>👕 Ropa</option>
+            <option>🛒 Alimentación</option>
+            <option>🎉 Ocio</option>
+            <option>🚗 Transporte</option>
+            <option>💊 Salud</option>
+            <option>📚 Educación</option>
+            <option>💻 Tecnología</option>
+            <option>🏠 Casa</option>
+            <option>💪 Deporte</option>
+            <option>✈️ Viajes</option>
+            <option>📦 Otros</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Importe (€)</label>
+          <input class="form-input" type="number" id="inp-amt" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
+        </div>
+        <button class="btn-add" onclick="addExpense()">Añadir gasto</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <button class="nav-item active" onclick="switchTab('resumen', this)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Resumen
+    </button>
+    <button class="nav-item" onclick="switchTab('gastos', this)">
+      <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+      Gastos
+    </button>
+    <button class="nav-item" onclick="switchTab('nuevo', this)">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      Añadir
+    </button>
+  </nav>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const CAT_COLORS = {
+  '👕 Ropa': '#EEEDFE',
+  '🛒 Alimentación': '#E1F5EE',
+  '🎉 Ocio': '#FAEEDA',
+  '🚗 Transporte': '#E6F1FB',
+  '💊 Salud': '#FAECE7',
+  '📚 Educación': '#FBEAF0',
+  '💻 Tecnología': '#E6F1FB',
+  '🏠 Casa': '#EAF3DE',
+  '💪 Deporte': '#FAEEDA',
+  '✈️ Viajes': '#E1F5EE',
+  '📦 Otros': '#F1F0FA',
+};
+
+function loadData() {
+  try { return JSON.parse(localStorage.getItem('gastos_daniel') || '[]'); } catch { return []; }
+}
+function saveData(d) { localStorage.setItem('gastos_daniel', JSON.stringify(d)); }
+
+let expenses = loadData();
+if (!expenses.length) {
+  expenses = [
+    {id:1, desc:'Camisetas', mes:'Junio', year:'2025', cat:'👕 Ropa', amt:47},
+    {id:2, desc:'Camisetas', mes:'Julio', year:'2025', cat:'👕 Ropa', amt:47},
+    {id:3, desc:'Gasto extra', mes:'Julio', year:'2025', cat:'📦 Otros', amt:100},
+    {id:4, desc:'Camisetas', mes:'Agosto', year:'2025', cat:'👕 Ropa', amt:47},
+  ];
+  saveData(expenses);
+}
+let nextId = expenses.length ? Math.max(...expenses.map(e=>e.id))+1 : 1;
+
+let chartInst = null;
+let activeTab = 'resumen';
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-'+tab).classList.add('active');
+  activeTab = tab;
+  if (tab === 'resumen') renderResumen();
+  if (tab === 'gastos') renderGastos();
+}
+
+function totalAll() { return expenses.reduce((s,e)=>s+e.amt,0); }
+function uniqueMonths() {
+  const seen = new Set();
+  const result = [];
+  expenses.forEach(e => { const k = e.year+'-'+MONTHS.indexOf(e.mes).toString().padStart(2,'0'); if(!seen.has(k)){seen.add(k);result.push({mes:e.mes,year:e.year,key:k});} });
+  return result.sort((a,b)=>a.key.localeCompare(b.key));
+}
+function totalByCat() {
+  const m = {};
+  expenses.forEach(e => m[e.cat] = (m[e.cat]||0)+e.amt);
+  return Object.entries(m).sort((a,b)=>b[1]-a[1]);
+}
+
+function renderResumen() {
+  const months = uniqueMonths();
+  const total = totalAll();
+  const avgMonth = months.length ? total/months.length : 0;
+  const lastKey = months[months.length-1];
+  const lastTotal = lastKey ? expenses.filter(e=>e.mes===lastKey.mes&&e.year===lastKey.year).reduce((s,e)=>s+e.amt,0) : 0;
+
+  document.getElementById('header-total').textContent = total.toFixed(2)+' €';
+  document.getElementById('metrics').innerHTML = `
+    <div class="metric"><div class="metric-label">Total</div><div class="metric-value accent">${total.toFixed(2)} €</div></div>
+    <div class="metric"><div class="metric-label">Media/mes</div><div class="metric-value">${avgMonth.toFixed(2)} €</div></div>
+    <div class="metric"><div class="metric-label">Último mes</div><div class="metric-value">${lastTotal.toFixed(2)} €</div></div>
+    <div class="metric"><div class="metric-label">Registros</div><div class="metric-value">${expenses.length}</div></div>
+  `;
+
+  const cats = totalByCat();
+  const maxCat = cats[0]?.[1]||1;
+  document.getElementById('cat-bars').innerHTML = cats.length
+    ? cats.map(([cat,amt]) => `<div class="cat-row">
+        <span class="cat-name">${cat}</span>
+        <div class="cat-bg"><div class="cat-fill" style="width:${Math.round(amt/maxCat*100)}%"></div></div>
+        <span class="cat-val">${amt.toFixed(2)} €</span>
+      </div>`).join('')
+    : '<div style="color:var(--text2);font-size:14px;text-align:center;padding:1rem">Sin datos aún</div>';
+
+  const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+  const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+  const textColor = isDark ? '#9990C8' : '#6B6789';
+  const labels = months.map(m => m.mes.substring(0,3)+' '+m.year.substring(2));
+  const data = months.map(m => parseFloat(expenses.filter(e=>e.mes===m.mes&&e.year===m.year).reduce((s,e)=>s+e.amt,0).toFixed(2)));
+
+  const ctx = document.getElementById('chart');
+  if (chartInst) chartInst.destroy();
+  if (months.length) {
+    chartInst = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          data,
+          backgroundColor: isDark ? '#2A2550' : '#EEEDFE',
+          borderColor: '#534AB7',
+          borderWidth: 1.5,
+          borderRadius: 5,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { ticks: { callback: v=>v+'€', font:{size:11}, color: textColor }, grid: { color: gridColor }, border: { display: false } },
+          x: { ticks: { font:{size:11}, color: textColor, autoSkip: false, maxRotation: 45 }, grid: { display: false }, border: { display: false } }
+        }
+      }
+    });
+  }
+}
+
+function renderGastos() {
+  const months = uniqueMonths();
+  if (!months.length) {
+    document.getElementById('expense-list').innerHTML = '<div class="empty">Aún no hay gastos.<br>Toca + Añadir para empezar.</div>';
+    return;
+  }
+  let html = '';
+  [...months].reverse().forEach(m => {
+    const items = expenses.filter(e=>e.mes===m.mes&&e.year===m.year);
+    const total = items.reduce((s,e)=>s+e.amt,0);
+    html += `<div class="month-label">${m.mes} ${m.year}</div>`;
+    items.forEach(e => {
+      html += `<div class="expense-item">
+        <div class="expense-icon" style="background:${CAT_COLORS[e.cat]||'#F1F0FA'}">${e.cat.split(' ')[0]}</div>
+        <div class="expense-body">
+          <div class="expense-name">${e.desc}</div>
+          <div class="expense-cat">${e.cat.split(' ').slice(1).join(' ')}</div>
+        </div>
+        <div class="expense-right">
+          <div class="expense-amount">${e.amt.toFixed(2)} €</div>
+          <button class="btn-del" onclick="deleteExpense(${e.id})">✕</button>
+        </div>
+      </div>`;
+    });
+    html += `<div class="month-total"><span>Total ${m.mes}</span><span>${total.toFixed(2)} €</span></div>`;
+  });
+  document.getElementById('expense-list').innerHTML = html;
+}
+
+function addExpense() {
+  const desc = document.getElementById('inp-desc').value.trim();
+  const mes = document.getElementById('inp-mes').value;
+  const year = document.getElementById('inp-year').value;
+  const cat = document.getElementById('inp-cat').value;
+  const amt = parseFloat(document.getElementById('inp-amt').value);
+  if (!desc || !amt || amt <= 0) { showToast('Rellena descripción e importe'); return; }
+  expenses.push({id: nextId++, desc, mes, year, cat, amt});
+  saveData(expenses);
+  document.getElementById('inp-desc').value = '';
+  document.getElementById('inp-amt').value = '';
+  showToast('Gasto añadido ✓');
+  switchTab('gastos', document.querySelectorAll('.nav-item')[1]);
+}
+
+function deleteExpense(id) {
+  expenses = expenses.filter(e=>e.id!==id);
+  saveData(expenses);
+  renderGastos();
+  document.getElementById('header-total').textContent = totalAll().toFixed(2)+' €';
+  showToast('Eliminado');
+}
+
+// Set current month
+const now = new Date();
+document.getElementById('inp-mes').value = MONTHS[now.getMonth()];
+
+renderResumen();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
