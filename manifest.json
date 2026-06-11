@@ -2,7 +2,8 @@
   "name": "Gastos Daniel",
   "short_name": "Gastos",
   "description": "Registro personal de gastos",
-  "start_url": "/",
+  "start_url": "/gastos-app/",
+  "scope": "/gastos-app/",
   "display": "standalone",
   "background_color": "#534AB7",
   "theme_color": "#534AB7",
@@ -22,3 +23,4 @@
     }
   ]
 }
+
