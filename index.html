@@ -221,17 +221,9 @@
         <div class="form-group">
           <label class="form-label">Categoría</label>
           <select class="form-input" id="inp-cat">
+            <option>🎲 Juegos</option>
             <option>👕 Ropa</option>
-            <option>🛒 Alimentación</option>
-            <option>🎉 Ocio</option>
-            <option>🚗 Transporte</option>
-            <option>💊 Salud</option>
-            <option>📚 Educación</option>
-            <option>💻 Tecnología</option>
-            <option>🏠 Casa</option>
-            <option>💪 Deporte</option>
-            <option>✈️ Viajes</option>
-            <option>📦 Otros</option>
+            <option>🏍️ Moto</option>
           </select>
         </div>
         <div class="form-group" id="inc-cat-group" style="display:none">
@@ -276,12 +268,11 @@
 <script>
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const CAT_COLORS = {
-  '👕 Ropa':'#EEEDFE','🛒 Alimentación':'#E1F5EE','🎉 Ocio':'#FAEEDA',
-  '🚗 Transporte':'#E6F1FB','💊 Salud':'#FAECE7','📚 Educación':'#FBEAF0',
-  '💻 Tecnología':'#E6F1FB','🏠 Casa':'#EAF3DE','💪 Deporte':'#FAEEDA',
-  '✈️ Viajes':'#E1F5EE','📦 Otros':'#F1F0FA',
+  '🎲 Juegos':'#EEEDFE',
+  '👕 Ropa':'#E6F1FB',
+  '🏍️ Moto':'#FAEEDA',
   '💼 Nómina':'#E1F5EE','🏦 Ahorro':'#E6F1FB','🎁 Regalo':'#FBEAF0',
-  '📈 Inversión':'#EAF3DE','🤝 Freelance':'#FAEEDA',
+  '📈 Inversión':'#EAF3DE','🤝 Freelance':'#FAEEDA','📦 Otros':'#F1F0FA',
 };
 
 function loadEntries() { try { return JSON.parse(localStorage.getItem('entries_daniel') || '[]'); } catch { return []; } }
